@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
 <title>DROSEROS FAMILY</title>
 
 <style>
@@ -20,18 +21,13 @@ text-align:center;
 box-shadow:0 0 20px red;
 }
 
-header img{
-max-width:220px;
-width:100%;
-height:auto;
-margin-bottom:10px;
-}
-
 h1{
 margin:0;
-font-size:30px;
+font-size:34px;
 color:gold;
-text-shadow:0 0 10px red;
+text-shadow:0 0 10px red, 2px 2px 0 #8b0000;
+font-family:'Permanent Marker',Arial,sans-serif;
+letter-spacing:1px;
 }
 
 .container{
@@ -96,22 +92,6 @@ color:lime;
 font-weight:bold;
 }
 
-.gallery{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
-margin-top:15px;
-}
-
-.gallery img{
-width:100%;
-height:140px;
-object-fit:cover;
-border-radius:10px;
-border:1px solid gold;
-box-shadow:0 0 8px rgba(255,0,0,.4);
-}
-
 .fee-note{
 color:gold;
 font-weight:bold;
@@ -157,21 +137,11 @@ margin:0;
 <body>
 
 <header>
-<img src="logo.png" alt="Logo DROSEROS FAMILY">
-<h1>DROSEROS FAMILY</h1>
+<h1>INVITATION DROSEROS FAMILY</h1>
 <p>Invitation Registration</p>
 </header>
 
 <div class="container">
-
-<div class="card">
-<h2>📸 Galeri</h2>
-<div class="gallery">
-<img src="foto1.jpg" alt="Foto 1">
-<img src="foto2.jpg" alt="Foto 2">
-<img src="foto3.jpg" alt="Foto 3">
-</div>
-</div>
 
 <div class="card">
 <h2>📅 Open Invitation</h2>
@@ -231,37 +201,39 @@ margin:0;
 </div>
 
 <script>
-// Tanggal yang sudah pasti terisi dari awal (admin/manual)
-var tanggalTerisiAwal = ['2026-07-03'];
+// Tanggal+waktu yang sudah pasti terisi dari awal (admin/manual)
+// Format: 'YYYY-MM-DD|JAM', contoh '2026-07-03|20.00 - 20.30'
+var slotTerisiAwal = ['2026-07-03|20.00 - 20.30'];
 
 // Ambil data booking yang disimpan di browser (localStorage)
-function getBookedDates(){
-  var stored = localStorage.getItem('droserosBooked');
+function getBookedSlots(){
+  var stored = localStorage.getItem('droserosBookedSlots');
   var bookedFromUser = stored ? JSON.parse(stored) : [];
-  // Gabungkan tanggal awal + tanggal hasil submit user, tanpa duplikat
-  var all = tanggalTerisiAwal.concat(bookedFromUser);
+  var all = slotTerisiAwal.concat(bookedFromUser);
   return all.filter(function(item, index){
     return all.indexOf(item) === index;
   });
 }
 
 function renderDateList(){
-  var booked = getBookedDates();
+  var booked = getBookedSlots();
   var container = document.getElementById('dateList');
   container.innerHTML = '';
 
   booked.sort();
-  booked.forEach(function(tgl){
-    var tanggalFormat = formatTanggalIndo(tgl);
+  booked.forEach(function(slot){
+    var parts = slot.split('|');
+    var tanggalFormat = formatTanggalIndo(parts[0]);
+    var jam = parts[1];
     var p = document.createElement('p');
     p.className = 'booked';
-    p.innerHTML = '❌ ' + tanggalFormat;
+    p.innerHTML = '❌ ' + tanggalFormat + ' (' + jam + ')';
     container.appendChild(p);
   });
 
   var info = document.createElement('p');
   info.className = 'available';
-  info.innerHTML = '✅ Selain tanggal di atas, semua tanggal 1-15 Juli tersedia';
+  info.innerHTML = '✅ Slot waktu lain di tanggal 1-15 Juli masih tersedia';
   container.appendChild(info);
 }
 
@@ -348,18 +320,19 @@ function submitForm(){
     return;
   }
 
-  var booked = getBookedDates();
+  var slotDipilih = tanggal + '|' + waktu;
+  var booked = getBookedSlots();
 
-  if(booked.indexOf(tanggal) !== -1){
-    showMessage('❌ Maaf, tanggal tersebut sudah terisi. Silakan pilih tanggal lain!', 'error');
+  if(booked.indexOf(slotDipilih) !== -1){
+    showMessage('❌ Maaf, slot waktu tersebut sudah terisi. Silakan pilih jam lain!', 'error');
     return;
   }
 
-  // Simpan tanggal baru sebagai terisi
-  var stored = localStorage.getItem('droserosBooked');
+  // Simpan slot baru sebagai terisi
+  var stored = localStorage.getItem('droserosBookedSlots');
   var bookedFromUser = stored ? JSON.parse(stored) : [];
-  bookedFromUser.push(tanggal);
-  localStorage.setItem('droserosBooked', JSON.stringify(bookedFromUser));
+  bookedFromUser.push(slotDipilih);
+  localStorage.setItem('droserosBookedSlots', JSON.stringify(bookedFromUser));
 
   var pesanPromo = promo ? ' Kamu ikut promo fee 20K — jangan lupa transfer ke DANA 085803342796 a.n Vegi, lalu kirim bukti transfer ke Discord ya! 🎉' : '';
   showMessage('✅ Invitation berhasil terkirim! Terima kasih, ' + nama + '.' + pesanPromo, 'success');
