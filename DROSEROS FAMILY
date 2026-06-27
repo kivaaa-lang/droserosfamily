@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DROSEROS FAMILY</title>
+
+<style>
+body{
+background:#0d0d0d;
+color:white;
+font-family:Arial,sans-serif;
+margin:0;
+}
+
+header{
+background:#8b0000;
+padding:20px;
+text-align:center;
+box-shadow:0 0 20px red;
+}
+
+h1{
+margin:0;
+font-size:30px;
+}
+
+.container{
+padding:20px;
+}
+
+.card{
+background:#1b1b1b;
+padding:15px;
+border-radius:15px;
+margin-top:20px;
+box-shadow:0 0 10px rgba(255,0,0,.5);
+}
+
+input,select{
+width:100%;
+padding:10px;
+margin-top:10px;
+background:#111;
+color:white;
+border:1px solid red;
+border-radius:8px;
+}
+
+button{
+width:100%;
+padding:15px;
+margin-top:20px;
+background:red;
+color:white;
+border:none;
+border-radius:10px;
+font-size:18px;
+}
+
+.booked{
+color:red;
+font-weight:bold;
+}
+
+.available{
+color:lime;
+font-weight:bold;
+}
+</style>
+
+</head>
+<body>
+
+<header>
+<h1>DROSEROS FAMILY</h1>
+<p>Invitation Registration</p>
+</header>
+
+<div class="container">
+
+<div class="card">
+<h2>📅 Open Invitation</h2>
+<p>1 Juli 2026 - 15 Juli 2026</p>
+</div>
+
+<div class="card">
+<h2>🔒 Tanggal Terisi</h2>
+
+<p class="booked">❌ Juli/p>
+<p class="booked">❌ 3 Juli</p>
+<p class="booked">❌ Juli</p>
+
+<p class="available">✅ 2,4,6-15 Juli tersedia</p>
+
+</div>
+
+<div class="card">
+
+<h2>📝 Registrasi</h2>
+
+<input placeholder="Nama Community">
+
+<input placeholder="Username Discord">
+
+<input type="date">
+
+<input type="time">
+
+<button>SUBMIT INVITATION</button>
+
+</div>
+
+</div>
+
+</body>
+</html>
