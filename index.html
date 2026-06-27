@@ -20,9 +20,18 @@ text-align:center;
 box-shadow:0 0 20px red;
 }
 
+header img{
+max-width:220px;
+width:100%;
+height:auto;
+margin-bottom:10px;
+}
+
 h1{
 margin:0;
 font-size:30px;
+color:gold;
+text-shadow:0 0 10px red;
 }
 
 .container{
@@ -34,7 +43,12 @@ background:#1b1b1b;
 padding:15px;
 border-radius:15px;
 margin-top:20px;
+border:1px solid gold;
 box-shadow:0 0 10px rgba(255,0,0,.5);
+}
+
+.card h2{
+color:gold;
 }
 
 input,select{
@@ -48,15 +62,23 @@ border-radius:8px;
 box-sizing:border-box;
 }
 
+label{
+display:block;
+margin-top:15px;
+color:gold;
+font-weight:bold;
+}
+
 button{
 width:100%;
 padding:15px;
 margin-top:20px;
-background:red;
-color:white;
+background:linear-gradient(90deg,red,#8b0000);
+color:gold;
 border:none;
 border-radius:10px;
 font-size:18px;
+font-weight:bold;
 cursor:pointer;
 }
 
@@ -72,6 +94,15 @@ font-weight:bold;
 .available{
 color:lime;
 font-weight:bold;
+}
+
+.fee-note{
+color:gold;
+font-weight:bold;
+}
+
+#dateList p{
+margin:5px 0;
 }
 
 #message{
@@ -92,12 +123,25 @@ color:lime;
 background:#3d0d0d;
 color:red;
 }
+
+.checkbox-row{
+display:flex;
+align-items:center;
+gap:10px;
+margin-top:15px;
+}
+
+.checkbox-row input{
+width:auto;
+margin:0;
+}
 </style>
 
 </head>
 <body>
 
 <header>
+<img src="logo.png" alt="Logo DROSEROS FAMILY">
 <h1>DROSEROS FAMILY</h1>
 <p>Invitation Registration</p>
 </header>
@@ -111,11 +155,17 @@ color:red;
 
 <div class="card">
 <h2>🔒 Tanggal Terisi</h2>
+<div id="dateList">
+<!-- Diisi otomatis lewat JavaScript -->
+</div>
+</div>
 
-<p class="booked">❌ 3 Juli</p>
-
-<p class="available">✅ Selain 3 Juli, semua tanggal 1-15 Juli tersedia</p>
-
+<div class="card">
+<h2>💰 Promo Spesial</h2>
+<p class="fee-note">Mau fee 20K? Dapat spesial posting di TikTok DFL!</p>
+<p style="color:#ccc;font-size:14px;">*Opsional. Kalau tidak mau, gapapa, tetap bisa daftar invitation seperti biasa.</p>
+<p class="fee-note">💳 Pembayaran ke DANA: 085803342796 a.n Vegi</p>
+<p style="color:#ccc;font-size:14px;">*Kirim bukti transfer ke Discord setelah submit form di bawah.</p>
 </div>
 
 <div class="card">
@@ -130,6 +180,11 @@ color:red;
 
 <input id="waktu" type="time">
 
+<div class="checkbox-row">
+<input type="checkbox" id="promoTiktok">
+<label for="promoTiktok" style="margin:0;">Ikut promo fee 20K (spesial posting TikTok DFL)</label>
+</div>
+
 <button onclick="submitForm()">SUBMIT INVITATION</button>
 
 <div id="message"></div>
@@ -139,20 +194,87 @@ color:red;
 </div>
 
 <script>
+// Tanggal yang sudah pasti terisi dari awal (admin/manual)
+var tanggalTerisiAwal = ['2026-07-03'];
+
+// Ambil data booking yang disimpan di browser (localStorage)
+function getBookedDates(){
+  var stored = localStorage.getItem('droserosBooked');
+  var bookedFromUser = stored ? JSON.parse(stored) : [];
+  // Gabungkan tanggal awal + tanggal hasil submit user, tanpa duplikat
+  var all = tanggalTerisiAwal.concat(bookedFromUser);
+  return all.filter(function(item, index){
+    return all.indexOf(item) === index;
+  });
+}
+
+function renderDateList(){
+  var booked = getBookedDates();
+  var container = document.getElementById('dateList');
+  container.innerHTML = '';
+
+  booked.sort();
+  booked.forEach(function(tgl){
+    var tanggalFormat = formatTanggalIndo(tgl);
+    var p = document.createElement('p');
+    p.className = 'booked';
+    p.innerHTML = '❌ ' + tanggalFormat;
+    container.appendChild(p);
+  });
+
+  var info = document.createElement('p');
+  info.className = 'available';
+  info.innerHTML = '✅ Selain tanggal di atas, semua tanggal 1-15 Juli tersedia';
+  container.appendChild(info);
+}
+
+// URL Webhook Discord (untuk kirim notifikasi submission)
+var DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1520562682804306022/2LTvG1iLQ2K7v7ElsNzXtC8bGyobaik-Mzn5iSb401cC0bRKeFKsyDevdDf3B1pM9rHv';
+
+function kirimKeDiscord(nama, discord, tanggal, waktu, promo){
+  var tanggalFormat = formatTanggalIndo(tanggal);
+  var pesanPromo = promo ? '✅ Ikut promo fee 20K (TikTok DFL)' : '❌ Tidak ikut promo';
+
+  var embedData = {
+    embeds: [{
+      title: '📝 Invitation Baru - DROSEROS FAMILY',
+      color: 16711680,
+      fields: [
+        { name: 'Nama Community', value: nama, inline: true },
+        { name: 'Username Discord', value: discord, inline: true },
+        { name: 'Tanggal', value: tanggalFormat, inline: true },
+        { name: 'Waktu', value: waktu, inline: true },
+        { name: 'Promo', value: pesanPromo, inline: false }
+      ]
+    }]
+  };
+
+  fetch(DISCORD_WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(embedData)
+  }).catch(function(err){
+    console.log('Gagal kirim ke Discord:', err);
+  });
+}
+function formatTanggalIndo(tgl){
+  var bagian = tgl.split('-');
+  var hari = parseInt(bagian[2], 10);
+  return hari + ' Juli';
+}
+
 function submitForm(){
   var nama = document.getElementById('nama').value.trim();
   var discord = document.getElementById('discord').value.trim();
   var tanggal = document.getElementById('tanggal').value;
   var waktu = document.getElementById('waktu').value;
-  var msg = document.getElementById('message');
+  var promo = document.getElementById('promoTiktok').checked;
 
-  // Validasi field kosong
   if(!nama || !discord || !tanggal || !waktu){
     showMessage('❌ Mohon lengkapi semua data sebelum submit!', 'error');
     return;
   }
 
-  // Validasi rentang tanggal undangan (1-15 Juli 2026)
   var tglDipilih = new Date(tanggal);
   var tglMulai = new Date('2026-07-01');
   var tglAkhir = new Date('2026-07-15');
@@ -162,22 +284,31 @@ function submitForm(){
     return;
   }
 
-  // Validasi tanggal yang sudah terisi (3 Juli)
-  var tanggalTerisi = ['2026-07-03'];
+  var booked = getBookedDates();
 
-  if(tanggalTerisi.indexOf(tanggal) !== -1){
-    showMessage('❌ Maaf, tanggal 3 Juli sudah terisi. Silakan pilih tanggal lain!', 'error');
+  if(booked.indexOf(tanggal) !== -1){
+    showMessage('❌ Maaf, tanggal tersebut sudah terisi. Silakan pilih tanggal lain!', 'error');
     return;
   }
 
-  // Kalau semua validasi lolos
-  showMessage('✅ Invitation berhasil terkirim! Terima kasih, ' + nama, 'success');
+  // Simpan tanggal baru sebagai terisi
+  var stored = localStorage.getItem('droserosBooked');
+  var bookedFromUser = stored ? JSON.parse(stored) : [];
+  bookedFromUser.push(tanggal);
+  localStorage.setItem('droserosBooked', JSON.stringify(bookedFromUser));
 
-  // Reset form setelah berhasil
+  var pesanPromo = promo ? ' Kamu ikut promo fee 20K — jangan lupa transfer ke DANA 085803342796 a.n Vegi, lalu kirim bukti transfer ke Discord ya! 🎉' : '';
+  showMessage('✅ Invitation berhasil terkirim! Terima kasih, ' + nama + '.' + pesanPromo, 'success');
+
+  kirimKeDiscord(nama, discord, tanggal, waktu, promo);
+
   document.getElementById('nama').value = '';
   document.getElementById('discord').value = '';
   document.getElementById('tanggal').value = '';
   document.getElementById('waktu').value = '';
+  document.getElementById('promoTiktok').checked = false;
+
+  renderDateList();
 }
 
 function showMessage(text, type){
@@ -187,7 +318,9 @@ function showMessage(text, type){
   msg.className = type === 'success' ? 'msg-success' : 'msg-error';
 }
 
+// Tampilkan daftar tanggal terisi saat halaman dibuka
+renderDateList();
+</script>
 
-
-
-
+</body>
+</html>
