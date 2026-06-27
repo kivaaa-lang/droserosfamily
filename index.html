@@ -45,6 +45,7 @@ background:#111;
 color:white;
 border:1px solid red;
 border-radius:8px;
+box-sizing:border-box;
 }
 
 button{
@@ -56,6 +57,11 @@ color:white;
 border:none;
 border-radius:10px;
 font-size:18px;
+cursor:pointer;
+}
+
+button:active{
+background:#a00;
 }
 
 .booked{
@@ -66,6 +72,25 @@ font-weight:bold;
 .available{
 color:lime;
 font-weight:bold;
+}
+
+#message{
+margin-top:15px;
+padding:10px;
+border-radius:8px;
+display:none;
+font-weight:bold;
+text-align:center;
+}
+
+.msg-success{
+background:#0d3d0d;
+color:lime;
+}
+
+.msg-error{
+background:#3d0d0d;
+color:red;
 }
 </style>
 
@@ -87,11 +112,9 @@ font-weight:bold;
 <div class="card">
 <h2>🔒 Tanggal Terisi</h2>
 
-<p class="booked">❌ Juli/p>
 <p class="booked">❌ 3 Juli</p>
-<p class="booked">❌ Juli</p>
 
-<p class="available">✅ 2,4,6-15 Juli tersedia</p>
+<p class="available">✅ Selain 3 Juli, semua tanggal 1-15 Juli tersedia</p>
 
 </div>
 
@@ -99,12 +122,74 @@ font-weight:bold;
 
 <h2>📝 Registrasi</h2>
 
-<input placeholder="Nama Community">
+<input id="nama" placeholder="Nama Community">
 
-<input placeholder="Username Discord">
+<input id="discord" placeholder="Username Discord">
 
-<input type="date">
+<input id="tanggal" type="date" min="2026-07-01" max="2026-07-15">
 
+<input id="waktu" type="time">
+
+<button onclick="submitForm()">SUBMIT INVITATION</button>
+
+<div id="message"></div>
+
+</div>
+
+</div>
+
+<script>
+function submitForm(){
+  var nama = document.getElementById('nama').value.trim();
+  var discord = document.getElementById('discord').value.trim();
+  var tanggal = document.getElementById('tanggal').value;
+  var waktu = document.getElementById('waktu').value;
+  var msg = document.getElementById('message');
+
+  // Validasi field kosong
+  if(!nama || !discord || !tanggal || !waktu){
+    showMessage('❌ Mohon lengkapi semua data sebelum submit!', 'error');
+    return;
+  }
+
+  // Validasi rentang tanggal undangan (1-15 Juli 2026)
+  var tglDipilih = new Date(tanggal);
+  var tglMulai = new Date('2026-07-01');
+  var tglAkhir = new Date('2026-07-15');
+
+  if(tglDipilih < tglMulai || tglDipilih > tglAkhir){
+    showMessage('❌ Invitation hanya dibuka 1 - 15 Juli 2026!', 'error');
+    return;
+  }
+
+  // Validasi tanggal yang sudah terisi (3 Juli)
+  var tanggalTerisi = ['2026-07-03'];
+
+  if(tanggalTerisi.indexOf(tanggal) !== -1){
+    showMessage('❌ Maaf, tanggal 3 Juli sudah terisi. Silakan pilih tanggal lain!', 'error');
+    return;
+  }
+
+  // Kalau semua validasi lolos
+  showMessage('✅ Invitation berhasil terkirim! Terima kasih, ' + nama, 'success');
+
+  // Reset form setelah berhasil
+  document.getElementById('nama').value = '';
+  document.getElementById('discord').value = '';
+  document.getElementById('tanggal').value = '';
+  document.getElementById('waktu').value = '';
+}
+
+function showMessage(text, type){
+  var msg = document.getElementById('message');
+  msg.innerText = text;
+  msg.style.display = 'block';
+  msg.className = type === 'success' ? 'msg-success' : 'msg-error';
+}
+</script>
+
+</body>
+</html>
 <input type="time">
 
 <button>SUBMIT INVITATION</button>
